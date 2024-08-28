@@ -6,7 +6,7 @@ document.getElementById('save').addEventListener('click', () => {
   chrome.runtime.sendMessage({ action: "updateProxy", host, port }, (response) => {
     if (chrome.runtime.lastError) {
       setModelMsg(chrome.runtime.lastError.message)
-      onStartup()
+      //onStartup()
     } else {
       if (response.success) {
         setModelMsg("GProxy Connect Success !")
@@ -18,7 +18,7 @@ document.getElementById('save').addEventListener('click', () => {
         chrome.storage.local.set({ isconnected: true });
       } else {
         setModelMsg("Failed to connect gproxy settings.")
-        onStartup()
+        //onStartup()
       }
     }
   });
@@ -31,7 +31,7 @@ document.getElementById('reset').addEventListener('click', () => {
   chrome.runtime.sendMessage({ action: "disconnectProxy", host, port }, (response) => {
     if (chrome.runtime.lastError) {
       setModelMsg(chrome.runtime.lastError.message)
-      onStartup()
+      //onStartup()
     } else {
       if (response.success) {
         setModelMsg("GProxy Disconnect Success !")
@@ -43,7 +43,7 @@ document.getElementById('reset').addEventListener('click', () => {
         chrome.storage.local.set({ isconnected: false });
       } else {
         setModelMsg("Failed to disconnect gproxy.")
-        onStartup()
+        //onStartup()
       }
     }
   });
