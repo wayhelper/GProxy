@@ -7,23 +7,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h1>Welcome to GProxy</h1>
-  <label for="host">Proxy Host:</label>
-  <input id="host" type="text" placeholder="e.g., proxy.example.com" value="127.0.0.1">
-  <label for="port">Proxy Port:</label>
-  <input id="port" type="number" placeholder="e.g., 8080" value="7897">
-  <button id="save">Start</button>
-  <button id="reset" hidden="hidden">Disconnect</button>
-</div>
-
-<!-- 模态框 -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <p id="modal-text">Proxy settings saved!</p>
+  <div class="container">
+    <h1>Welcome to GProxy</h1>
+    <label for="host">Proxy Host:</label>
+    <input id="host" type="text" placeholder="e.g., proxy.example.com" value="127.0.0.1">
+    <label for="port">Proxy Port:</label>
+    <input id="port" type="number" placeholder="e.g., 8080" value="7897">
+    <button id="save">Start</button>
+    <button id="reset" hidden="hidden">Disconnect</button>
   </div>
-</div>
-
-<script src="popup.js"></script>
+  <!-- 模态框 -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <p id="modal-text">Proxy settings saved!</p>
+    </div>
+  </div>
+<script src="popup.js"/>
 </body>
 </html>
