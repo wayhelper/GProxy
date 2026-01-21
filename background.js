@@ -1,79 +1,11 @@
 // set the proxy settings for Chrome extension
 const host = '127.0.0.1';
-const port = 2334;
+const port = 2335;
 const scheme = 'http'; // 'http', 'https', 'socks4', 'socks5'
 
 // bypass and block list
-let cachedBypassList = [
-    "10.0.0.0/8"
-    ,"100.64.0.0/16"
-    ,"127.16.0.0/16"
-    ,"192.168.0.0/16"
-    ,"194.1.0.0/16"
-    ,"*163.com"
-    ,"*360.com"
-    ,"*4399.com"
-    ,"*51.net"
-    ,"*51cto.com"
-    ,"*51job.com"
-    ,"*58.com"
-    ,"*7k7k.com"
-    ,"*alibaba.com"
-    ,"*alibabacloud.com"
-    ,"*alicdn.com"
-    ,"*alipan.com"
-    ,"*alipay.com"
-    ,"*aliyun.com"
-    ,"*baidu.com"
-    ,"*bilibili.com"
-    ,"*cn"
-    ,"*cnblogs.com"
-    ,"*csdn.net"
-    ,"*deepseek.com"
-    ,"*douyin.com"
-    ,"*douyu.com"
-    ,"*gitee.com"
-    ,"*hutool.cn"
-    ,"*huya.com"
-    ,"*iqiyi.com"
-    ,"*ixigua.com"
-    ,"*jianshu.*"
-    ,"*jd.com"
-    ,"*kuaishou.com"
-    ,"*layui.com"
-    ,"*postman.co"
-    ,"*qq.com"
-    ,"*qzone.qq.com"
-    ,"*sina.com"
-    ,"*sogou.com"
-    ,"*sohu.com"
-    ,"*taobao.com"
-    ,"*tencent.com"
-    ,"*tmall.com"
-    ,"*toutiao.com"
-    ,"*weibo.com"
-    ,"*wechat.com"
-    ,"*weixin.qq.com"
-    ,"*xiaomi.com"
-    ,"*xunlei.com"
-    ,"*youku.com"
-    ,"*zhihu.com"
-    ,"alal.site"
-    ,"tool.alal.site"
-    ,"v.alal.site"
-];
-let cachedBlockList = [
-    "*pornhub.com"
-    ,"*xvideos.com"
-    ,"*xhamster.com"
-    ,"*xnxx.com"
-    ,"*redtube.com"
-    ,"*youporn.com"
-    ,"*youjizz.com"
-    ,"*tube8.com"
-    ,"*spankbang.com"
-    ,"*tnaflix.com"
-];
+let cachedBypassList = [];
+let cachedBlockList = [];
 
 // apply the proxy settings
 async function applyProxy() {
@@ -180,4 +112,35 @@ chrome.commands.onCommand.addListener((command) => {
         clearHistory();
     }
 });
+// 在 background.js 中添加
+chrome.action.onClicked.addListener(() => {
+    chrome.tabs.create({
+        url: 'options.html'
+    });
+});
+// 监听存储变化：当 options.js 修改了存储，这里会立刻触发
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.customBypassList) {
+        console.log('检测到名单更新，正在重新应用代理...');
+        // 更新内存中的变量
+        cachedBypassList = changes.customBypassList.newValue;
+        // 立即重新应用代理设置
+        applyProxy();
+    }
+});
 
+// 扩展启动/安装时，从存储加载配置（保证持久化）
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.get(['customBypassList'], async (result) => {
+        if (result.customBypassList) {
+            cachedBypassList = result.customBypassList;
+        } else {
+            // 如果是第一次安装，将代码里的默认名单存入 storage
+            cachedBypassList = await fetch('https://kv.alal.site/api?key=GProxy-Pass', {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json', 'appKey': 'password'},
+            });
+            chrome.storage.local.set({customBypassList: cachedBypassList});
+        }
+    });
+});
