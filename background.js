@@ -1,69 +1,38 @@
-// 代理控制核心变量（改由内存维护，初始为空，启动时从 storage 加载）
+// ==================== 1. 顶层定义变量 ====================
 let cachedScheme = 'http';
 let cachedHost = '127.0.0.1';
 let cachedPort = 2334;
-let cachedBypassList = [
-    "192.168.0.0/16"
-    ,"194.1.0.0/16"
-    ,"10.0.0.0/8"
-    ,"100.64.0.0/16"
-    ,"127.16.0.0/16"
-    ,"*baidu.com"
-    ,"*163.com"
-    ,"*qq.com"
-    ,"*jd.com"
-    ,"*360.com"
-    ,"*hutool.cn"
-    ,"*taobao.com"
-    ,"*cnblogs.com"
-    ,"*csdn.net"
-    ,"*gitee.com"
-    ,"*bilibili.com"
-    ,"*cn"
-    ,"*4399.com"
-    ,"*51.net"
-    ,"*51cto.com"
-    ,"*51job.com"
-    ,"*58.com"
-    ,"*7k7k.com"
-    ,"*91.com"
-    ,"*alipan.com"
-    ,"*alicdn.com"
-    ,"*alibaba.com"
-    ,"*alibabacloud.com"
-    ,"*alipay.com"
-    ,"*aliyun.com"
-    ,"*biliapi.com"
-    ,"*biliapi.net"
-    ,"*bilibili.com"
-    ,"*bilibili.tv"
-    ,"*bilicomic.com"
-    ,"*biligame.com"
-    ,"*biligame.net"
-    ,"*bilivideo.com"
-    ,"*douyu.com"
-    ,"*hao123.com"
-    ,"*huya.com"
-    ,"*iqiyi.com"
-    ,"*jianshu.*"
-    ,"*kuaishou.com"
-    ,"*layui.com"
-    ,"*qqmail.com"
-    ,"*sina.com"
-    ,"*sogou.com"
-    ,"*taobao.com"
-    ,"*tencent-cloud.com"
-    ,"*tencent.com"
-    ,"*xiaomi.com"
-    ,"*zhihu.com"
-    ,"*douyin.com"
-    ,"*deepseek.com"
-    ,"*xunlei.com"
-    ,"*weibo.com"
-    ,"*postman.co"
-    ,"gtool.alal.site"];
-let cachedBlockList = []; // 保留供未来黑名单使用
+let cachedBypassList = [];
 
+// ==================== 2. 顶层注册监听器 ====================
+chrome.storage.onChanged.addListener((changes, area) => {
+    console.log(`检测到存储变化，区域: ${area}, 变化内容:`, changes);
+    if (area === 'local') {
+        let needReapply = false;
+
+        if (changes.customBypassList) {
+            cachedBypassList = changes.customBypassList.newValue;
+            needReapply = true;
+        }
+        if (changes.proxyScheme) {
+            cachedScheme = changes.proxyScheme.newValue;
+            needReapply = true;
+        }
+        if (changes.proxyHost) {
+            cachedHost = changes.proxyHost.newValue;
+            needReapply = true;
+        }
+        if (changes.proxyPort) {
+            cachedPort = changes.proxyPort.newValue;
+            needReapply = true;
+        }
+
+        if (needReapply) {
+            console.log('检测到配置更新，正在重新应用代理...');
+            applyProxy();
+        }
+    }
+});
 // apply the proxy settings
 async function applyProxy() {
     try {
@@ -143,34 +112,6 @@ chrome.action.onClicked.addListener(() => {
     chrome.tabs.create({ url: 'options.html' });
 });
 
-// 监听存储变化：不管是名单变了，还是 host/port/scheme 变了，都立刻同步并刷新代理
-chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local') {
-        let needReapply = false;
-
-        if (changes.customBypassList) {
-            cachedBypassList = changes.customBypassList.newValue;
-            needReapply = true;
-        }
-        if (changes.proxyScheme) {
-            cachedScheme = changes.proxyScheme.newValue;
-            needReapply = true;
-        }
-        if (changes.proxyHost) {
-            cachedHost = changes.proxyHost.newValue;
-            needReapply = true;
-        }
-        if (changes.proxyPort) {
-            cachedPort = changes.proxyPort.newValue;
-            needReapply = true;
-        }
-
-        if (needReapply) {
-            console.log('检测到配置更新，正在重新应用代理...');
-            applyProxy();
-        }
-    }
-});
 
 // 扩展启动/安装/Service Worker 唤醒时，从本地存储加载全部配置
 function loadConfigAndInit() {
@@ -187,7 +128,7 @@ function loadConfigAndInit() {
         // 加载服务器配置
         cachedScheme = result.proxyScheme || 'http';
         cachedHost = result.proxyHost || '127.0.0.1';
-        cachedPort = result.proxyPort || 2335;
+        cachedPort = result.proxyPort || 2334;
 
         // 如果用户没配置过服务器，帮其初始化默认值
         if (!result.proxyScheme || !result.proxyHost || !result.proxyPort) {
@@ -197,7 +138,6 @@ function loadConfigAndInit() {
                 proxyPort: cachedPort
             });
         }
-
         console.log('已成功从本地存储加载全部规则与服务器配置');
     });
 }
