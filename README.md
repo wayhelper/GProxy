@@ -27,13 +27,12 @@
 
 #### 使用说明
 
-1. 确认代理端口是否为2334。
-2. 启用GProxy扩展。
+1. 启用GProxy扩展。
+2. 默认代理端口2334。
 3. 浏览器右键 选择GProxy -> open 代理即可。
 
 #### 插件截图
 <img alt="GProxy-Logo" src="/image/1.png">
-<img alt="GProxy-Logo" src="/image/2.png">
 
 #### 参与贡献
 
