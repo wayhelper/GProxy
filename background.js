@@ -22,7 +22,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
             needReapply = true;
         }
         if (needReapply) {
-            applyProxy();
+            applyProxy().then(r => console.log('已成功重新应用代理设置'));
         }
     }
 });
@@ -63,16 +63,16 @@ function clearProxy() {
 }
 
 chrome.contextMenus.removeAll(() => {
-    ['open(Ctrl+Shift+Space)', 'close(Ctrl+Space)','clearHistory'].forEach(id => {
+    ['open', 'close','clear'].forEach(id => {
         chrome.contextMenus.create({ id, title: id, contexts: ['all'] });
     });
 });
 
 chrome.contextMenus.onClicked.addListener(info => {
     switch (info.menuItemId) {
-        case 'open(Ctrl+Shift+Space)': applyProxy(); break;
-        case 'close(Ctrl+Space)': clearProxy(); break;
-        case 'clearHistory': clearHistory(); break;
+        case 'open': applyProxy(); break;
+        case 'close': clearProxy(); break;
+        case 'clear': clearHistory(); break;
     }
 });
 
@@ -84,16 +84,6 @@ async function clearHistory() {
         console.error(`❌ 清空历史记录时出错:`, err);
     }
 }
-
-chrome.commands.onCommand.addListener((command) => {
-    if (command === "open-proxy") {
-        applyProxy();
-    } else if (command === "close-proxy") {
-        clearProxy();
-    } else {
-        clearHistory();
-    }
-});
 
 chrome.action.onClicked.addListener(() => {
     chrome.tabs.create({ url: 'options.html' });
@@ -124,5 +114,7 @@ function loadConfigAndInit() {
     });
 }
 
-chrome.runtime.onInstalled.addListener(loadConfigAndInit);
-loadConfigAndInit();
+chrome.runtime.onInstalled.addListener(()=>{
+    loadConfigAndInit();
+    applyProxy().then(r => console.log('已成功应用代理设置'));
+});
