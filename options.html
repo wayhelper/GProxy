@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GProxy 控制台</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+            --border-color: #333;
+            --input-bg: #2d2d2d;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+        h1 { color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 15px; font-weight: 500; }
+        .section { margin-bottom: 30px; }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #252525;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #555; transition: 0.3s; }
+        .active { background: #03dac6; box-shadow: 0 0 10px #03dac6; }
+        textarea {
+            width: 100%;
+            height: 250px;
+            font-family: 'Consolas', monospace;
+            padding: 15px;
+            background: var(--input-bg);
+            color: #8ab4f8;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 10px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .controls { display: flex; gap: 12px; margin-top: 20px; }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+        }
+        .btn-green { background: #03dac6; color: #000; }
+        .btn-green:hover { background: #01b0a1; transform: translateY(-1px); }
+        .btn-red { background: #cf6679; color: #000; }
+        .btn-red:hover { background: #b05566; }
+        .btn-blue { background: #3700b3; color: white; flex-grow: 1; }
+        .btn-blue:hover { background: #4e00ff; }
+        .info-text { font-size: 13px; color: #999; margin-top: 5px; }
+        #bypass-list {
+            overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.25) transparent;
+        }
+        #bypass-list::-webkit-scrollbar {
+            width: 2px;
+            height: 2px;
+        }
+        #bypass-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #bypass-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.25);
+            border-radius: 999px;
+        }
+        #bypass-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>GProxy 选项</h1>
+
+    <div class="section">
+        <h3 style="margin-bottom: 10px;">代理服务器设置 (Proxy Server)</h3>
+        <div style="display: flex; gap: 15px; background: #252525; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 120px;">
+                <label style="display: block; font-size: 13px; color: #999; margin-bottom: 5px;">协议 (Scheme)</label>
+                <select id="proxy-scheme" style="width: 100%; padding: 10px; background: var(--input-bg); color: #8ab4f8; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <option value="http">http</option>
+                    <option value="https">https</option>
+                    <option value="socks4">socks4</option>
+                    <option value="socks5">socks5</option>
+                </select>
+            </div>
+            <div style="flex: 2; min-width: 200px;">
+                <label style="display: block; font-size: 13px; color: #999; margin-bottom: 5px;">主机地址 (Host)</label>
+                <input type="text" id="proxy-host" placeholder="例如: 127.0.0.1" style="width: 100%; padding: 10px; background: var(--input-bg); color: #8ab4f8; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+                <label style="display: block; font-size: 13px; color: #999; margin-bottom: 5px;">端口 (Port)</label>
+                <input type="number" id="proxy-port" placeholder="例如: 2335" style="width: 100%; padding: 10px; background: var(--input-bg); color: #8ab4f8; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box;">
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="status-bar">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="status-text" style="flex-grow: 1;">检测中...</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3 style="margin-bottom: 5px;">绕行名单 (Bypass List)</h3>
+        <p class="info-text">以下域名和 IP 将直接连接，不经过代理服务器。</p>
+        <textarea id="bypass-list" placeholder="例如：*baidu.com"></textarea>
+        <div class="controls">
+            <button id="btn-save" class="btn-blue">保存并更新配置</button>
+        </div>
+    </div>
+</div>
+<script src="options.js"></script>
+</body>
+</html>
