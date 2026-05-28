@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "GProxy",
+  "version": "6.0",
+  "description": "A lightweight proxy plug-in.",
+  "permissions": [
+    "commands",
+    "proxy",
+    "storage",
+    "declarativeNetRequest",
+    "contextMenus",
+    "history",
+    "cookies",
+    "tabs",
+    "webRequest",
+    "webRequestAuthProvider"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "icons": {
+    "16": "image/icon16.png",
+    "48": "image/icon48.png",
+    "128": "image/icon128.png"
+  },
+  "action": {
+    "default_title": "选项"
+  }
+}
